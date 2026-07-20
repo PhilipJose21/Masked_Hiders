@@ -19,6 +19,12 @@ public class ThirdPersonCamera : MonoBehaviour
     private float rotationX = 0f;
     private float rotationY = 0f;
 
+    // Separate variable to lock the player's horizontal rotation
+    private float playerRotationY = 0f;
+
+    // Toggle flag to lock/unlock player rotation
+    private bool isPlayerRotationLocked = false;
+
     void Start()
     {
         // Locks the cursor to the center of the screen and hides it
@@ -39,9 +45,19 @@ public class ThirdPersonCamera : MonoBehaviour
             // 3. Initialize rotation variables based on current camera angles
             rotationY = transform.eulerAngles.y;
             rotationX = transform.eulerAngles.x;
+            playerRotationY = rotationY;
             
             // Normalize rotationX if it's wrapping around 360 degrees
             if (rotationX > 180) rotationX -= 360;
+        }
+    }
+
+    void Update()
+    {
+        // Toggle player rotation lock state when 'Q' is pressed
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            isPlayerRotationLocked = !isPlayerRotationLocked;
         }
     }
 
@@ -49,19 +65,24 @@ public class ThirdPersonCamera : MonoBehaviour
     {
         if (player == null) return;
 
-        // Get mouse input multiplied by sensitivity and time
+        // Camera always processes mouse input
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
-        // Calculate rotations
         rotationY += mouseX;
         rotationX -= mouseY;
         rotationX = Mathf.Clamp(rotationX, minVerticalAngle, maxVerticalAngle); 
 
-        // 1. Rotate the Player horizontally (Y-axis) based on mouse movement
-        player.rotation = Quaternion.Euler(0f, rotationY, 0f);
+        // Only update the player's target rotation if NOT locked
+        if (!isPlayerRotationLocked)
+        {
+            playerRotationY = rotationY;
+        }
 
-        // 2. Position and rotate the Camera around the player using the captured offsets
+        // 1. Rotate the Player using playerRotationY (stays fixed if Q was toggled)
+        player.rotation = Quaternion.Euler(0f, playerRotationY, 0f);
+
+        // 2. Position and rotate the Camera around the player using active camera rotationY
         Quaternion cameraRotation = Quaternion.Euler(rotationX, rotationY, 0f);
         
         Vector3 targetOffset = new Vector3(0, cameraHeight, -distanceToPlayer);

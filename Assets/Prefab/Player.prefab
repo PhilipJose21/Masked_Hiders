@@ -295,7 +295,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 563424525
+  GlobalObjectIdHash: 3004748302
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -321,10 +321,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e0c1b887e407be46ab216e57690fe2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DetectObject
+  ShowTopMostFoldoutHeaderGroup: 1
   meshFilter: {fileID: 6012658801874476828}
   playerCamera: {fileID: 0}
   lookDistance: 18.45
-  gizmoRadius: 0.2
   detectionRadius: 0.25
 --- !u!114 &474801016797741037
 MonoBehaviour:
@@ -339,8 +339,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
   ShowTopMostFoldoutHeaderGroup: 1
+  _mainCollider: {fileID: 0}
   turnSmoothTime: 0.1
-  speed: 5
+  speed: 10
   gravity: 30
   jumpHeight: 1.5
   jumpHoldBoost: 20
