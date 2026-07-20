@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 8788276381459013434}
   m_Layer: 0
   m_Name: Camera
-  m_TagString: MainCamera
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -199,7 +199,9 @@ GameObject:
   - component: {fileID: 5357597887572338186}
   - component: {fileID: 8600410685388112200}
   - component: {fileID: 474801016797741037}
+  - component: {fileID: 2915424512082962483}
   - component: {fileID: 3039664256052726390}
+  - component: {fileID: 6346618431021658133}
   - component: {fileID: 5368524520378110445}
   - component: {fileID: 5740128593747296734}
   m_Layer: 0
@@ -295,7 +297,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 3004748302
+  GlobalObjectIdHash: 563424525
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -340,7 +342,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Player
   ShowTopMostFoldoutHeaderGroup: 1
   _mainCollider: {fileID: 0}
-  turnSmoothTime: 0.1
   speed: 10
   gravity: 30
   jumpHeight: 1.5
@@ -350,6 +351,21 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 8
+--- !u!114 &2915424512082962483
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7743868858900839925}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc1b106d34bedd04fbdb62c00063c285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCameraSetup
+  ShowTopMostFoldoutHeaderGroup: 1
+  playerCamera: {fileID: 5084959039550828203}
+  audioListener: {fileID: 6690504096765035774}
 --- !u!114 &3039664256052726390
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -374,14 +390,14 @@ MonoBehaviour:
   RotationMaxInterpolationTime: 0.1
   ScaleLerpSmoothing: 1
   ScaleMaxInterpolationTime: 0.1
-  AuthorityMode: 0
+  AuthorityMode: 1
   TickSyncChildren: 0
   UseUnreliableDeltas: 0
   SyncPositionX: 1
   SyncPositionY: 1
   SyncPositionZ: 1
   SyncRotAngleX: 1
-  SyncRotAngleY: 1
+  SyncRotAngleY: 0
   SyncRotAngleZ: 1
   SyncScaleX: 0
   SyncScaleY: 0
@@ -394,8 +410,25 @@ MonoBehaviour:
   UseHalfFloatPrecision: 0
   InLocalSpace: 0
   SwitchTransformSpaceWhenParented: 0
-  Interpolate: 1
+  Interpolate: 0
   SlerpPosition: 0
+--- !u!114 &6346618431021658133
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7743868858900839925}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6c0be61502bb534f922ebb746851216, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkRigidbody
+  ShowTopMostFoldoutHeaderGroup: 1
+  NetworkRigidbodyBaseExpanded: 0
+  UseRigidBodyForMotion: 0
+  AutoUpdateKinematicState: 1
+  AutoSetKinematicOnDespawn: 1
 --- !u!54 &5368524520378110445
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -420,8 +453,8 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 48
+  m_Interpolate: 1
+  m_Constraints: 80
   m_CollisionDetection: 0
 --- !u!136 &5740128593747296734
 CapsuleCollider:
