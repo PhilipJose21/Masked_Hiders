@@ -1,17 +1,34 @@
 using UnityEngine;
+using Unity.Netcode;
 
-public class TransformPlayer : MonoBehaviour
+public class TransformPlayer : NetworkBehaviour
 {
-    public void TransformPlayerToObject(GameObject player, GameObject targetObject)
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestTransformServerRpc(ulong playerNetworkObjectId, ulong targetNetworkObjectId)
+    {
+        // Broadcast the transformation to all clients
+        TransformClientRpc(playerNetworkObjectId, targetNetworkObjectId);
+    }
+
+    [ClientRpc]
+    private void TransformClientRpc(ulong playerNetworkObjectId, ulong targetNetworkObjectId)
+    {
+        if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(playerNetworkObjectId, out NetworkObject playerNetObj)) return;
+        if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(targetNetworkObjectId, out NetworkObject targetNetObj)) return;
+
+        GameObject player = playerNetObj.gameObject;
+        GameObject targetObject = targetNetObj.gameObject;
+
+        ExecuteTransform(player, targetObject);
+    }
+
+    private void ExecuteTransform(GameObject player, GameObject targetObject)
     {
         MeshFilter targetMeshFilter = targetObject.GetComponent<MeshFilter>();
         MeshRenderer targetMeshRenderer = targetObject.GetComponent<MeshRenderer>();
         Collider targetCollider = targetObject.GetComponent<Collider>();
 
-        if (targetMeshFilter == null || targetMeshFilter.sharedMesh == null || targetCollider == null)
-        {
-            return;
-        }
+        if (targetMeshFilter == null || targetMeshFilter.sharedMesh == null || targetCollider == null) return;
 
         ReplacePlayerColliders(player, targetCollider);
 
@@ -22,13 +39,7 @@ public class TransformPlayer : MonoBehaviour
             playerMeshFilter.sharedMesh = targetMeshFilter.sharedMesh;
         }
 
-        SkinnedMeshRenderer playerSkinnedMeshRenderer = player.GetComponentInChildren<SkinnedMeshRenderer>();
-        if (playerSkinnedMeshRenderer != null)
-        {
-            playerSkinnedMeshRenderer.sharedMesh = targetMeshFilter.sharedMesh;
-        }
-
-        // --- Match materials ---
+        // --- Match materials (Ensures colors sync on Client) ---
         MeshRenderer playerMeshRenderer = player.GetComponentInChildren<MeshRenderer>();
         if (playerMeshRenderer != null && targetMeshRenderer != null)
         {
@@ -40,17 +51,12 @@ public class TransformPlayer : MonoBehaviour
 
     private void ReplacePlayerColliders(GameObject player, Collider targetCollider)
     {
-        // 1. Destroy existing colliders
         Collider[] existingColliders = player.GetComponentsInChildren<Collider>();
         foreach (Collider existingCollider in existingColliders)
         {
-            if (existingCollider != null)
-            {
-                Destroy(existingCollider);
-            }
+            if (existingCollider != null) Destroy(existingCollider);
         }
 
-        // 2. Add the matching new collider type
         if (targetCollider is BoxCollider boxCollider)
         {
             BoxCollider playerCollider = player.AddComponent<BoxCollider>();
@@ -74,16 +80,11 @@ public class TransformPlayer : MonoBehaviour
         else if (targetCollider is MeshCollider meshCollider)
         {
             MeshCollider playerCollider = player.AddComponent<MeshCollider>();
-            playerCollider.sharedMesh = meshCollider.sharedMesh != null ? meshCollider.sharedMesh : targetObjectMesh(targetCollider);
+            MeshFilter targetFilter = targetCollider.GetComponent<MeshFilter>();
+            playerCollider.sharedMesh = meshCollider.sharedMesh != null ? meshCollider.sharedMesh : (targetFilter != null ? targetFilter.sharedMesh : null);
             playerCollider.convex = meshCollider.convex;
             playerCollider.cookingOptions = meshCollider.cookingOptions;
         }
-    }
-
-    private Mesh targetObjectMesh(Collider targetCollider)
-    {
-        MeshFilter meshFilter = targetCollider.GetComponent<MeshFilter>();
-        return meshFilter != null ? meshFilter.sharedMesh : null;
     }
 
     private void SnapToGround(GameObject player, Collider targetCollider)
