@@ -343,14 +343,16 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   _mainCollider: {fileID: 0}
   speed: 10
-  gravity: 30
+  gravity: 45
   jumpHeight: 1.5
   jumpHoldBoost: 20
+  fallGravityMultiplier: 1
+  lowJumpGravityMultiplier: 2
   groundCheck: {fileID: 8218663400015072574}
   groundCheckRadius: 0.2
   groundMask:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 4294967295
 --- !u!114 &2915424512082962483
 MonoBehaviour:
   m_ObjectHideFlags: 0

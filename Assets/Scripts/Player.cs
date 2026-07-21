@@ -17,6 +17,8 @@ public class Player : NetworkBehaviour
     [SerializeField] private float gravity = 19.62f;
     [SerializeField] private float jumpHeight = 1.5f;
     [SerializeField] private float jumpHoldBoost = 10f;
+    [SerializeField] private float fallGravityMultiplier = 2.5f;   // NEW: stronger pull once falling
+    [SerializeField] private float lowJumpGravityMultiplier = 2f;  // NEW: extra pull if jump released early
 
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
@@ -93,7 +95,6 @@ public class Player : NetworkBehaviour
         }
 
         // Horizontal Movement — camera-relative, no rotation ownership here.
-        // ThirdPersonCamera is the single source of truth for transform.rotation.
         Vector2 move2d = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
 
         if (move2d.magnitude >= 0.1f)
@@ -109,9 +110,24 @@ public class Player : NetworkBehaviour
             velocity.z = 0f;
         }
 
-        velocity.y -= gravity * Time.fixedDeltaTime;
+        // --- Variable gravity based on jump phase ---
+        float appliedGravity = gravity;
+
+        if (velocity.y < 0f)
+        {
+            // Falling — pull down harder so descent feels snappy instead of floaty.
+            appliedGravity = gravity * fallGravityMultiplier;
+        }
+        else if (velocity.y > 0f && !_isHoldingJump)
+        {
+            // Rising but the player let go of Jump early — cut the arc short
+            // for responsive variable-height jumps, rather than a full float to peak.
+            appliedGravity = gravity * lowJumpGravityMultiplier;
+        }
+        // else: still rising and holding Jump — use base gravity for a smooth, full-height ascent.
+
+        velocity.y -= appliedGravity * Time.fixedDeltaTime;
         _rb.linearVelocity = velocity;
-        Debug.Log($"[FixedUpdate {Time.frameCount}] pos={transform.position:F3} rotY={transform.eulerAngles.y:F2} vel={velocity:F3}");
     }
 
     private bool IsGrounded()
@@ -131,7 +147,19 @@ public class Player : NetworkBehaviour
             currentCollider.bounds.center.z
         );
 
-        return Physics.CheckSphere(bottomCenter, groundCheckRadius, groundMask, QueryTriggerInteraction.Ignore);
+        Collider[] hits = Physics.OverlapSphere(bottomCenter, groundCheckRadius, groundMask, QueryTriggerInteraction.Ignore);
+
+        foreach (Collider hit in hits)
+        {
+            if (hit.transform.IsChildOf(transform) || hit.transform == transform)
+            {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     private void OnDrawGizmosSelected()

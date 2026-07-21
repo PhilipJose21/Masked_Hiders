@@ -95,7 +95,5 @@ public class ThirdPersonCamera : MonoBehaviour
 
         transform.position = targetPosition;
         transform.LookAt(player.position + Vector3.up * cameraHeight);
-        Debug.Log($"[LateUpdate {Time.frameCount}] pos={player.position:F3} rotY={player.eulerAngles.y:F2}");
-
     }
 }
